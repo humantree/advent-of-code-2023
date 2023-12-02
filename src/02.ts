@@ -30,9 +30,13 @@ function parseInput(input: string[]) {
 
 const games = parseInput(input)
 const possibleIds = []
+const gamesPowers = []
 
 for (const game of games) {
   let possible = true
+  let maxRed = 0
+  let maxGreen = 0
+  let maxBlue = 0
 
   for (const sets of game.sets) {
     for (const set of sets) {
@@ -42,10 +46,23 @@ for (const game of games) {
       } else {
         throw new Error(`Unexpected color found: ${set.color}`)
       }
+
+      switch (set.color) {
+        case "red":
+          if (set.count > maxRed) maxRed = set.count
+          break
+        case "green":
+          if (set.count > maxGreen) maxGreen = set.count
+          break
+        case "blue":
+          if (set.count > maxBlue) maxBlue = set.count
+          break
+      }
     }
   }
 
   if (possible) possibleIds.push(parseInt(game.id))
+  gamesPowers.push(maxRed * maxGreen * maxBlue)
 }
 
 const possibleIdsTotal = possibleIds.reduce((id, acc) => (acc += id), 0)
@@ -55,3 +72,12 @@ console.log(
 )
 console.log("What is the sum of the IDs of the possible games?")
 console.log(possibleIdsTotal)
+
+const gamesPowersTotal = gamesPowers.reduce((power, acc) => (acc += power), 0)
+
+console.log()
+console.log(
+  "For each game, find the minimum set of cubes that must have been present."
+)
+console.log("What is the sum of the power of these sets?")
+console.log(gamesPowersTotal)
