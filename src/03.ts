@@ -12,6 +12,7 @@ type Number = {
 }
 
 type Symbol = {
+  adjacentValues: number[]
   location: Location
   symbol: string
 }
@@ -60,6 +61,7 @@ for (let y = 0; y < input.length; y++) {
 
       if (value !== ".") {
         symbols.push({
+          adjacentValues: [],
           location: [x, y],
           symbol: value,
         })
@@ -89,7 +91,7 @@ for (const number of numbers) {
 
     if (foundSymbol) {
       number.partNumber = true
-      break
+      symbol.adjacentValues.push(number.value)
     }
   }
 }
@@ -102,3 +104,16 @@ console.log(
   "What is the sum of all of the part numbers in the engine schematic?"
 )
 console.log(partNumbersTotal)
+
+const gearRatiosTotal = symbols
+  .filter(
+    (symbol) => symbol.symbol === "*" && symbol.adjacentValues.length === 2
+  )
+  .map((gear) => gear.adjacentValues[0] * gear.adjacentValues[1])
+  .reduce((acc, gearRatio) => (acc += gearRatio), 0)
+
+console.log()
+console.log(
+  "What is the sum of all of the gear ratios in your engine schematic?"
+)
+console.log(gearRatiosTotal)
