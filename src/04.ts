@@ -3,30 +3,33 @@ import loadInputFile from "./common/loadInputFile"
 const input = await loadInputFile(4)
 
 type Card = {
-  id: number
   matches: number[]
   scratchedNumbers: number[]
   winningNumbers: number[]
 }
 
-const cards: Card[] = input.map((line) => {
-  const [text, numbers] = line.split(":")
-  const id = parseInt(text.split(/\s+/)[1])
-  const [winningNumbers, scratchedNumbers] = numbers.split("|").map((numbers) =>
-    numbers
-      .trim()
-      .split(/\s+/)
-      .map((number) => parseInt(number))
-  )
+const cards: Map<number, Card> = new Map(
+  input.map((line) => {
+    const [text, numbers] = line.split(":")
+    const id = parseInt(text.split(/\s+/)[1])
+    const [winningNumbers, scratchedNumbers] = numbers
+      .split("|")
+      .map((numbers) =>
+        numbers
+          .trim()
+          .split(/\s+/)
+          .map((number) => parseInt(number))
+      )
 
-  const matches = scratchedNumbers.filter((number) =>
-    winningNumbers.includes(number)
-  )
+    const matches = scratchedNumbers.filter((number) =>
+      winningNumbers.includes(number)
+    )
 
-  return { id, matches, scratchedNumbers, winningNumbers }
-})
+    return [id, { matches, scratchedNumbers, winningNumbers }]
+  })
+)
 
-const pointsTotal = cards.reduce((acc, card) => {
+const pointsTotal = [...cards.entries()].reduce((acc, [_, card]) => {
   const points = card.matches.length ? Math.pow(2, card.matches.length - 1) : 0
   return (acc += points)
 }, 0)
@@ -36,16 +39,17 @@ console.log(pointsTotal)
 
 const cardQueue = [...cards]
 let cardsCounted = 0
-let card
+let next
 
-while ((card = cardQueue.shift())) {
+while ((next = cardQueue.shift())) {
+  const [id, card] = next
   cardsCounted++
 
   for (let i = 1; i <= card.matches.length; i++) {
-    const prizeCardId = card.id + i
-    const prizeCard = cards.find((card) => card.id === prizeCardId)
+    const prizeCardId = id + i
+    const prizeCard = cards.get(prizeCardId)
     if (!prizeCard) throw new Error(`No card found with the ID ${prizeCardId}`)
-    cardQueue.push(prizeCard)
+    cardQueue.push([prizeCardId, prizeCard])
   }
 }
 
